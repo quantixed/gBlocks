@@ -7,13 +7,16 @@
 ///	@param	hexSize	size of hexagon (centre to any corner)
 ///	@param	hexOpt	pointy-topped = 0, flat-topped = 1
 ///	@param	rowOpt	even row left = 0, even row right = 1
-Function MakeArray(arraySize,hexSize,hexOpt,rowOpt)
+///	@param	exclOpt	square array = 0, constrain to circle = 1
+Function MakeArray(arraySize,hexSize,hexOpt,rowOpt,exclOpt)
 	Variable arraySize,hexSize,hexOpt,rowOpt
 	
 	Variable height = hexSize * 2
 	Variable vert = height * (3/4)
 	Variable width = sqrt(3)/2 * height
 	Variable horiz = width
+	Variable midPQ = arraySize / 2
+	Variable centX,centY // centre of array
 	
 	Make/O/N=(arraySize,arraySize) matX,matY
 	
@@ -22,28 +25,40 @@ Function MakeArray(arraySize,hexSize,hexOpt,rowOpt)
 		// hexOpt = 0, rowOpt = 0
 		// 0,0 is 1w,0.5h; 1,0 is 0.5w,1.25h
 		matX = (1 * width) + (p * width) - (mod(q,2) * 0.5 * width)
-		maty = (0.5 * height) + (q * vert)
+		matY = (0.5 * height) + (q * vert)
+		centX = (1 * width) + (midPQ * width) - (mod(midPQ,2) * 0.5 * width)
+		centY = (0.5 * height) + (midPQ * vert)
 		else
 		// hexOpt = 0, rowOpt = 1
 		// 0,0 is 0.5w,0.5h; 1,0 is 1w,1.25h
 		matX = (0.5 * width) + (p * width) + (mod(q,2) * 0.5 * width)
-		maty = (0.5 * height) + (q * vert)
+		matY = (0.5 * height) + (q * vert)
+		centX = (0.5 * width) + (midPQ * width) + (mod(midPQ,2) * 0.5 * width)
+		centY = (0.5 * height) + (midPQ * vert)
 		endif
 	else
 		if(rowOpt == 0)
 		// hexOpt = 1, rowOpt = 0
 		// 0,0 is 1.25w,0.5h; 1,0 is 0.5w,1h
 		matX = (1.25 * width) + (p * width)
-		maty = (0.5 * height) + (q * vert) - (mod(p,2) * 0.5 * height)
+		matY = (0.5 * height) + (q * vert) - (mod(p,2) * 0.5 * height)
+		centX = (1.25 * width) + (midPQ * width)
+		centY = (0.5 * height) + (midPQ * vert) - (mod(midPQ,2) * 0.5 * height)
 		else
 		// hexOpt = 1, rowOpt = 1
 		// 0,0 is 0.5w,0.5h; 1,0 is 1w,1.25h
 		matX = (0.5 * width) + (p * width)
-		maty = (0.5 * height) + (q * vert) + (mod(p,2) * 0.5 * height)
+		matY = (0.5 * height) + (q * vert) + (mod(p,2) * 0.5 * height)
+		centX = (0.5 * width) + (midPQ * width)
+		centY = (0.5 * height) + (midPQ * vert) + (mod(midPQ,2) * 0.5 * height)
 		endif
 	endif
 	Concatenate/O/KILL {matx,matY}, matA
 	Redimension/E=1/N=(arraySize^2,2) matA
+	// do exclusion
+	if(exclOpt == 1)
+		// do exclusion
+	endif
 	// Add noise to coords
 	matA += gnoise(0.1)
 	
