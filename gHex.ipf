@@ -9,7 +9,7 @@
 ///	@param	rowOpt	even row left = 0, even row right = 1
 ///	@param	exclOpt	square array = 0, constrain to circle = 1
 Function MakeArray(arraySize,hexSize,hexOpt,rowOpt,exclOpt)
-	Variable arraySize,hexSize,hexOpt,rowOpt
+	Variable arraySize,hexSize,hexOpt,rowOpt,exclOpt
 	
 	Variable height = hexSize * 2
 	Variable vert = height * (3/4)
@@ -53,12 +53,15 @@ Function MakeArray(arraySize,hexSize,hexOpt,rowOpt,exclOpt)
 		centY = (0.5 * height) + (midPQ * vert) + (mod(midPQ,2) * 0.5 * height)
 		endif
 	endif
-	Concatenate/O/KILL {matx,matY}, matA
-	Redimension/E=1/N=(arraySize^2,2) matA
+	
+	Variable dist = min(centX,centY)
 	// do exclusion
 	if(exclOpt == 1)
-		// do exclusion
+		matX = (sqrt( (matX[p][q] - centX)^2 + (matY[p][q] - centY)^2) < dist ) ? matX[p][q] : NaN
+		matY = (sqrt( (matX[p][q] - centX)^2 + (matY[p][q] - centY)^2) < dist ) ? matY[p][q] : NaN
 	endif
+	Concatenate/O/KILL {matx,matY}, matA
+	Redimension/E=1/N=(arraySize^2,2) matA
 	// Add noise to coords
 	matA += gnoise(0.1)
 	
