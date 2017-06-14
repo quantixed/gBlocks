@@ -5,8 +5,8 @@
 
 ///	@param	arraySize	size of square array (whole units)
 ///	@param	hexSize	size of hexagon (centre to any corner)
-///	@param	hexOpt	pointy-topped = 0, flat-topped = 1
-///	@param	rowOpt	even row left = 0, even row right = 1
+///	@param	hexOpt	pointy-topped/horizontal = 0, flat-topped/vertical = 1
+///	@param	rowOpt	even r/q = 0, odd r/q = 1
 ///	@param	exclOpt	square array = 0, constrain to circle = 1
 Function MakeArray(arraySize,hexSize,hexOpt,rowOpt,exclOpt)
 	Variable arraySize,hexSize,hexOpt,rowOpt,exclOpt
@@ -23,30 +23,38 @@ Function MakeArray(arraySize,hexSize,hexOpt,rowOpt,exclOpt)
 	if(hexOpt == 0)
 		if(rowOpt == 0)
 		// hexOpt = 0, rowOpt = 0
-		// 0,0 is 1w,0.5h; 1,0 is 0.5w,1.25h
+		// 0,0 is 1w,0.5h; 0,1 is 0.5w,1.25h
+		// even-r horizontal
 		matX = (1 * width) + (p * width) - (mod(q,2) * 0.5 * width)
 		matY = (0.5 * height) + (q * vert)
 		centX = (1 * width) + (midPQ * width) - (mod(midPQ,2) * 0.5 * width)
 		centY = (0.5 * height) + (midPQ * vert)
 		else
 		// hexOpt = 0, rowOpt = 1
-		// 0,0 is 0.5w,0.5h; 1,0 is 1w,1.25h
+		// 0,0 is 0.5w,0.5h; 0,1 is 1w,1.25h
+		// odd-r horizontal
 		matX = (0.5 * width) + (p * width) + (mod(q,2) * 0.5 * width)
 		matY = (0.5 * height) + (q * vert)
 		centX = (0.5 * width) + (midPQ * width) + (mod(midPQ,2) * 0.5 * width)
 		centY = (0.5 * height) + (midPQ * vert)
 		endif
 	else
+		width = hexSize * 2
+		horiz = width * (3/4)
+		height = sqrt(3)/2 * width
+		vert = height
 		if(rowOpt == 0)
 		// hexOpt = 1, rowOpt = 0
-		// 0,0 is 1.25w,0.5h; 1,0 is 0.5w,1h
+		// 0,0 is 0.5w,1h; 1,0 is 1.25w,0.5h
+		// even-q vertical
 		matX = (1.25 * width) + (p * width)
 		matY = (0.5 * height) + (q * vert) - (mod(p,2) * 0.5 * height)
 		centX = (1.25 * width) + (midPQ * width)
 		centY = (0.5 * height) + (midPQ * vert) - (mod(midPQ,2) * 0.5 * height)
 		else
 		// hexOpt = 1, rowOpt = 1
-		// 0,0 is 0.5w,0.5h; 1,0 is 1w,1.25h
+		// 0,0 is 0.5w,0.5h; 1,0 is 1.25w,1h
+		// odd-q vertical
 		matX = (0.5 * width) + (p * width)
 		matY = (0.5 * height) + (q * vert) + (mod(p,2) * 0.5 * height)
 		centX = (0.5 * width) + (midPQ * width)
