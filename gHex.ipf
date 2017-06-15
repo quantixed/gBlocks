@@ -1,6 +1,18 @@
 #pragma TextEncoding = "MacRoman"
 #pragma rtGlobals=3		// Use modern global access method and strict wave access.
 
+Function MakegHex(arraySize,hexSize,hexOpt,rowOpt,exclOpt)
+	Variable arraySize,hexSize,hexOpt,rowOpt,exclOpt
+	
+	MakeArray(arraySize,hexSize,hexOpt,rowOpt,exclOpt)
+	DisplayHexArray(arraySize)
+End
+
+Function MakeTowerHex()
+	MakeArray(50,1,0,0,1)
+	DisplayHexArray(50)
+End
+
 // First part of this code is to make hexagonal array with centres as points in a 2D wave
 
 ///	@param	arraySize	size of square array (whole units)
@@ -11,11 +23,16 @@
 Function MakeArray(arraySize,hexSize,hexOpt,rowOpt,exclOpt)
 	Variable arraySize,hexSize,hexOpt,rowOpt,exclOpt
 	
+	// sanity check
+	if(arraySize < 5 || hexSize == 0)
+		Abort "Use different parameters"
+	endif
+	
 	Variable height = hexSize * 2
 	Variable vert = height * (3/4)
 	Variable width = sqrt(3)/2 * height
 	Variable horiz = width
-	Variable midPQ = arraySize / 2
+	Variable midPQ = (arraySize - 1) / 2
 	Variable centX,centY // centre of array
 	
 	Make/O/N=(arraySize,arraySize) matX,matY
@@ -69,6 +86,12 @@ Function MakeArray(arraySize,hexSize,hexOpt,rowOpt,exclOpt)
 		matY = (sqrt( (matX[p][q] - centX)^2 + (matY[p][q] - centY)^2) < dist ) ? matY[p][q] : NaN
 	endif
 	Concatenate/O/KILL {matx,matY}, matA
+End
+
+Function DisplayHexArray(arraySize)
+	Variable arraySize
+	
+	WAVE/Z matA
 	Redimension/E=1/N=(arraySize^2,2) matA
 	// Add noise to coords
 	matA += gnoise(0.1)
