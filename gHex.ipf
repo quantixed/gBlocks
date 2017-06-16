@@ -4,13 +4,13 @@
 Function MakegHex(arraySize,hexSize,hexOpt,rowOpt,exclOpt)
 	Variable arraySize,hexSize,hexOpt,rowOpt,exclOpt
 	
-	MakeArray(arraySize,hexSize,hexOpt,rowOpt,exclOpt)
-	DisplayHexArray(arraySize)
+	Variable axisSize = MakeArray(arraySize,hexSize,hexOpt,rowOpt,exclOpt)
+	DisplayHexArray(arraySize,axisSize)
 End
 
 Function MakeTowerHex()
-	MakeArray(50,1,0,0,1)
-	DisplayHexArray(50)
+	Variable axisSize = MakeArray(50,1,0,0,1)
+	DisplayTowerHex(50,axisSize)
 End
 
 // First part of this code is to make hexagonal array with centres as points in a 2D wave
@@ -86,10 +86,11 @@ Function MakeArray(arraySize,hexSize,hexOpt,rowOpt,exclOpt)
 		matY = (sqrt( (matX[p][q] - centX)^2 + (matY[p][q] - centY)^2) < dist ) ? matY[p][q] : NaN
 	endif
 	Concatenate/O/KILL {matx,matY}, matA
+	Return max(centX,centY)
 End
 
-Function DisplayHexArray(arraySize)
-	Variable arraySize
+Function DisplayHexArray(arraySize,axisSize)
+	Variable arraySize,axisSize
 	
 	WAVE/Z matA
 	Redimension/E=1/N=(arraySize^2,2) matA
@@ -101,6 +102,8 @@ Function DisplayHexArray(arraySize)
 	ModifyGraph/W=result margin=5,width={Plan,1,bottom,left}
 	ModifyGraph/W=result mode=3,marker=19,mrkThick=0
 	ModifyGraph/W=result noLabel=2,axThick=0,standoff=0
+	SetAxis/W=result bottom 0,2*axisSize
+	SetAxis/W=result left 0 - (10*(axisSize/arraySize)),2*axisSize - (10*(axisSize/arraySize))
 	// make size
 	Make/O/N=(arraySize^2) sizeW = 5 + enoise(5)
 	ModifyGraph/W=result zmrkSize(matA)={sizeW,*,*,1,10}
@@ -116,4 +119,68 @@ Function DisplayHexArray(arraySize)
 			colorW[i][0] = 65535
 		endif
 	endfor
+End
+
+Function DisplayTowerHex(arraySize,axisSize)
+	Variable arraySize,axisSize
+	
+	WAVE/Z matA
+	// Add noise to coords
+	matA += gnoise(2)
+	SidechainDist(matA)
+	WAVE/Z distW
+	
+	// make 2 column
+	Redimension/E=1/N=(arraySize^2,2) matA
+	
+	KillWindow/Z result
+	Display/N=result/W=(50,50,650,650) matA[][1] vs matA[][0]
+	ModifyGraph/W=result margin=5,width={Plan,1,bottom,left}
+	ModifyGraph/W=result mode=3,marker=19,mrkThick=0
+	ModifyGraph/W=result noLabel=2,axThick=0,standoff=0
+	SetAxis/W=result bottom 0,2*axisSize
+	SetAxis/W=result left 0 - (10*(axisSize/arraySize)),2*axisSize - (10*(axisSize/arraySize))
+
+	ModifyGraph/W=result zmrkSize(matA)={distW,*,*,10,1}
+	// make color
+	Make/O/N=(arraySize^2,4) colorW=0
+	colorW[][3] = 65535/2 + 65535*enoise(0.5)
+	ModifyGraph/W=result zColor(matA)={colorW,*,*,directRGB,0}
+	Make/FREE/N=(arraySize^2) redW = enoise(1) - 0.9
+	Variable i
+	
+	for(i = 0; i < arraySize^2; i += 1)
+		if(redW[i] > 0)
+			colorW[i][0] = 65535
+		endif
+	endfor
+End
+
+Function SidechainDist(matA)
+	Wave matA
+	Variable pVar = dimsize(matA,0)
+	Variable qVar = dimsize(matA,1)
+	
+	Make/O/N=(pVar,qVar) distW=0
+	
+	Variable i,j
+	
+	for(i = 0; i < pVar; i += 1)
+		for(j = 0; j < qVar; j += 1)
+			Make/FREE/N=(6) w0
+			if(i == 0 || j == 0 || i == pvar - 1 || j == pvar -1)
+				w0 = 0
+			else
+			w0[0] = sqrt( (matA[i][j][0] - matA[i-1][j-1][0])^2 + (matA[i][j][1] - matA[i-1][j-1][1])^2 ) //1 11 oclock
+			w0[1] = sqrt( (matA[i][j][0] - matA[i][j-1][0])^2 + (matA[i][j][1] - matA[i][j-1][1])^2 ) //2 1 oclock
+			w0[2] = sqrt( (matA[i][j][0] - matA[i-1][j][0])^2 + (matA[i][j][1] - matA[i-1][j][1])^2 ) //3 9 oclock
+			w0[3] = sqrt( (matA[i][j][0] - matA[i+1][j][0])^2 + (matA[i][j][1] - matA[i+1][j][1])^2 ) //4 3 oclock
+			w0[4] = sqrt( (matA[i][j][0] - matA[i-1][j+1][0])^2 + (matA[i][j][1] - matA[i-1][j+1][1])^2 ) //5 7 oclock
+			w0[5] = sqrt( (matA[i][j][0] - matA[i][j+1][0])^2 + (matA[i][j][1] - matA[i][j+1][1])^2 ) //6 5 oclock
+			endif
+			WaveTransform zapnans,w0
+			distW[i][j] = sum(w0) / numpnts(w0)
+		endfor
+	endfor
+	Redimension/N=(pVar*qVar) distW
 End
