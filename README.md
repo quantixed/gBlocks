@@ -10,7 +10,7 @@ Take a grid of squares `grid_of_squares.R`
 
 Apply hysteresis to the corner position in an arc from the first square to the last `grid_of_hysterical_squares.R`
 
-![img](/img/gridOfHystericalSquares.png?raw=true "image")
+![img](/img/hystericalSquares.png?raw=true "image")
 
 
 ## Igor
